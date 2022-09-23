@@ -1,0 +1,195 @@
+---
+title: "566-hw1"
+author: "Yumeng Gao"
+date: "`r Sys.Date()`"
+output: github_document
+always_allow_html: true
+---
+
+> The primary question: whether daily concentrations of PM (particulate matter air pollution 5.2 with aerodynamic diameter less than 2.5 m) have decreased in California over the last 15 years (from 2004 to 2019) 
+
+### Prepare the library
+```{r}
+library(dplyr)
+library(tidyverse)
+library(data.table)
+library(R.utils)
+library(lubridate)
+library(leaflet)
+library(webshot)
+webshot::install_phantomjs()
+```
+
+## Step1. Conduct EDA Checklist items 2-4.
+
+Download then read in the data
+```{r}
+d04 <- data.table::fread("/Users/gao/Desktop/566 hw1/data_2004.csv")
+d19 <- data.table::fread("/Users/gao/Desktop/566 hw1/data_2019.csv")
+```
+
+For each of the two datasets, check the dimensions, headers, footers, variable names and variable types.
+```{r}
+dim(d04)
+head(d04)
+tail(d04)
+str(d04)
+```
+
+```{r}
+dim(d19)
+head(d19)
+tail(d19)
+str(d19)
+```
+
+Check for any data issues, particularly in the key variable we are analyzing.
+```{r}
+summary(d04$`Daily Mean PM2.5 Concentration`)
+table(d04$STATE)
+table(d04$COUNTY)
+table(d04$`Site Name`)
+```
+
+```{r}
+summary(d19$`Daily Mean PM2.5 Concentration`)
+table(d19$STATE)
+table(d19$COUNTY)
+table(d19$`Site Name`)
+```
+
+Remove values less than 0 of Daily Mean PM2.5 Concentration
+```{r}
+d04= d04[`Daily Mean PM2.5 Concentration`>= 0]
+d04_2= d04[order(`Daily Mean PM2.5 Concentration`)]
+head(d04_2)
+```
+
+```{r}
+d19= d19[`Daily Mean PM2.5 Concentration`>= 0]
+d19_2= d19[order(`Daily Mean PM2.5 Concentration`)]
+head(d19_2)
+```
+
+> SUMMARY: For 2004 data frame, there were 19233 observations and 20 variables. For 2019 data frame, there were 53156 observations and 20 variables.The key variable is Daily Mean PM2.5 Concentration, also, STATE, COUNTY and Site Name were presented since they would be used later. The average Daily Mean PM2.5 Concentration in 2004 was 13.13 ug/m3 LC and in 2019 was 7.74 ug/m3 LC. There were some values of Daily Mean PM2.5 Concentration less than 0 ug/m3 LC, which is meaningless for our analysis, so they were removed from the two data frames.
+
+## Step.2 Combine the two years of data into one data frame.  
+```{r}
+all= rbind(d04,d19)
+```
+
+Use the Date variable to create a new column for year, which will serve as an identifier.
+```{r}
+all$year= substring(all$Date,7,10)
+```
+
+Change the names of the key variables so that they are easier to refer to in your code.
+```{r}
+all= rename(all, "PM2.5" = `Daily Mean PM2.5 Concentration`, "SITE"= `Site Name`)
+all= rename(all, "lat"= `SITE_LATITUDE`, "lon"= `SITE_LONGITUDE`)
+```
+
+## Step3. Create a basic map in leaflet() that shows the locations of the sites (make sure to use different colors for each year). Summarize the spatial distribution of the monitoring sites.
+
+```{r}
+pal <- colorFactor(
+  palette = c('red','blue'),
+  domain = all$year
+)
+
+leaflet(all) %>%
+  addProviderTiles('OpenStreetMap') %>% 
+  addCircles(lat=~lat,lng=~lon, opacity=1, fillOpacity=1, radius=100, color = ~pal(year))
+```
+
+> SUMMARY: Based on this map, there were much more sites in 2019 (marked as blue spots) than in 2004 (marked as red spots). In 2019 the sites were spread the whole California State, comparing with only several separate spots in 2004.
+
+## Step4. Check for any missing or implausible values of PM2.5 in the combined dataset. 
+
+### At state level
+```{r}
+summary(all$PM2.5)
+sum(is.na(all$PM2.5))
+all_2= all[order(PM2.5)]
+head(all_2)
+tail(all_2)
+```
+* No missing values and no weird values which could be implausible.
+
+### At county level
+```{r}
+
+```
+
+### At site level
+```{r}
+
+```
+
+
+### Step.5 Explore the main question of interest at three different spatial levels. Create exploratory plots (e.g. boxplots, histograms, line plots) and summary statistics that best suit each level of data. Be sure to write up explanations of what you observe in these data.
+
+state
+```{r}
+
+```
+
+county
+```{r}
+
+```
+
+site in Los Angeles
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
