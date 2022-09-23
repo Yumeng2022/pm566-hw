@@ -1118,7 +1118,7 @@ leaflet(all) %>%
 
 > SUMMARY: Based on this map, there were much more sites in 2019 (marked
 > as blue spots) than in 2004 (marked as red spots). In 2019 the sites
-> were spread the whole California State, comparing with only several
+> spread the whole California State, comparing with only several
 > separate spots in 2004.
 
 ## Step4. Check for any missing or implausible values of PM2.5 in the combined dataset.
