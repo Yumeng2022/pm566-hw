@@ -184,7 +184,7 @@ qplot(xyear, PM2.5, data = mutate(con, xyear = as.numeric(as.character(year))),
        geom = c("point", "line"))
 ```
 
-In the county level, most states' mean PM2.5 decreased from 2004 to 2019, but there were still some states having increased mean PM2.5 over years.
+In the county level, most counties' mean PM2.5 decreased from 2004 to 2019, but there were still some states having increased mean PM2.5 over years.The counties not in common were not presented in this graph.
 
 ### Sites in Los Angeles
 ```{r}

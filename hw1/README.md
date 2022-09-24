@@ -1540,9 +1540,9 @@ qplot(xyear, PM2.5, data = mutate(con, xyear = as.numeric(as.character(year))),
 
 ![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
-In the county level, most states’ mean PM2.5 decreased from 2004 to
+In the county level, most counties’ mean PM2.5 decreased from 2004 to
 2019, but there were still some states having increased mean PM2.5 over
-years.
+years.The counties not in common were not presented in this graph.
 
 ### Sites in Los Angeles
 
