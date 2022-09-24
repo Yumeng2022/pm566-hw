@@ -1219,16 +1219,374 @@ tail(all_2)
     ## 5:    Mariposa 37.74871 -119.5871 2004
     ## 6:    Mariposa 37.74871 -119.5871 2004
 
--   No missing values and no weird values which could be implausible.
+No missing values and no weird values which could be implausible.
 
 ### At county level
 
+``` r
+c04= all %>% filter(year==2004) %>% distinct(COUNTY) 
+c19= all %>% filter(year==2019) %>% distinct(COUNTY)
+library(arsenal)
+```
+
+    ## 
+    ## Attaching package: 'arsenal'
+
+    ## The following object is masked from 'package:lubridate':
+    ## 
+    ##     is.Date
+
+``` r
+summary(comparedf(c04,c19, by="COUNTY"))
+```
+
+    ## 
+    ## 
+    ## Table: Summary of data.frames
+    ## 
+    ## version   arg    ncol   nrow
+    ## --------  ----  -----  -----
+    ## x         c04       1     47
+    ## y         c19       1     51
+    ## 
+    ## 
+    ## 
+    ## Table: Summary of overall comparison
+    ## 
+    ## statistic                                                      value
+    ## ------------------------------------------------------------  ------
+    ## Number of by-variables                                             1
+    ## Number of non-by variables in common                               0
+    ## Number of variables compared                                       0
+    ## Number of variables in x but not y                                 0
+    ## Number of variables in y but not x                                 0
+    ## Number of variables compared with some values unequal              0
+    ## Number of variables compared with all values equal                 0
+    ## Number of observations in common                                  47
+    ## Number of observations in x but not y                              0
+    ## Number of observations in y but not x                              4
+    ## Number of observations with some compared variables unequal        0
+    ## Number of observations with all compared variables equal          47
+    ## Number of values unequal                                           0
+    ## 
+    ## 
+    ## 
+    ## Table: Variables not shared
+    ## 
+    ##                          
+    ##  ------------------------
+    ##  No variables not shared 
+    ##  ------------------------
+    ## 
+    ## 
+    ## 
+    ## Table: Other variables not compared
+    ## 
+    ##                                  
+    ##  --------------------------------
+    ##  No other variables not compared 
+    ##  --------------------------------
+    ## 
+    ## 
+    ## 
+    ## Table: Observations not shared
+    ## 
+    ## version   COUNTY    observation
+    ## --------  -------  ------------
+    ## y         Glenn               9
+    ## y         Madera             17
+    ## y         Napa               24
+    ## y         Tehama             47
+    ## 
+    ## 
+    ## 
+    ## Table: Differences detected by variable
+    ## 
+    ##                                      
+    ##  ------------------------------------
+    ##  No differences detected by variable 
+    ##  ------------------------------------
+    ## 
+    ## 
+    ## 
+    ## Table: Differences detected
+    ## 
+    ##                          
+    ##  ------------------------
+    ##  No differences detected 
+    ##  ------------------------
+    ## 
+    ## 
+    ## 
+    ## Table: Non-identical attributes
+    ## 
+    ##                              
+    ##  ----------------------------
+    ##  No non-identical attributes 
+    ##  ----------------------------
+
+There were 47 counties observed in 2004, while 51 counties observed in
+2019. The unmatched counties were: Glenn, Madera, Napa,Tehama( all from
+2019). So we should keep only those counties in common for later
+analysis:
+
+``` r
+all_c= all %>% filter(all$COUNTY %in% intersect(c04$COUNTY, c19$COUNTY))
+```
+
 ### At site level
 
-### Step.5 Explore the main question of interest at three different spatial levels. Create exploratory plots (e.g. boxplots, histograms, line plots) and summary statistics that best suit each level of data. Be sure to write up explanations of what you observe in these data.
+-   LA’s county code is 37
 
-state
+``` r
+all_la= subset(all, COUNTY_CODE==37)
+sum(all_la$SITE=="")
+```
 
-county
+    ## [1] 108
 
-site in Los Angeles
+``` r
+all_la= subset(all_la, all_la$SITE != "")
+s04= all_la %>% filter(year==2004) %>% distinct(SITE) 
+s19= all_la %>% filter(year==2019) %>% distinct(SITE)
+library(arsenal)
+summary(comparedf(s04,s19, by="SITE"))
+```
+
+    ## 
+    ## 
+    ## Table: Summary of data.frames
+    ## 
+    ## version   arg    ncol   nrow
+    ## --------  ----  -----  -----
+    ## x         s04       1     10
+    ## y         s19       1     13
+    ## 
+    ## 
+    ## 
+    ## Table: Summary of overall comparison
+    ## 
+    ## statistic                                                      value
+    ## ------------------------------------------------------------  ------
+    ## Number of by-variables                                             1
+    ## Number of non-by variables in common                               0
+    ## Number of variables compared                                       0
+    ## Number of variables in x but not y                                 0
+    ## Number of variables in y but not x                                 0
+    ## Number of variables compared with some values unequal              0
+    ## Number of variables compared with all values equal                 0
+    ## Number of observations in common                                   8
+    ## Number of observations in x but not y                              2
+    ## Number of observations in y but not x                              5
+    ## Number of observations with some compared variables unequal        0
+    ## Number of observations with all compared variables equal           8
+    ## Number of values unequal                                           0
+    ## 
+    ## 
+    ## 
+    ## Table: Variables not shared
+    ## 
+    ##                          
+    ##  ------------------------
+    ##  No variables not shared 
+    ##  ------------------------
+    ## 
+    ## 
+    ## 
+    ## Table: Other variables not compared
+    ## 
+    ##                                  
+    ##  --------------------------------
+    ##  No other variables not compared 
+    ##  --------------------------------
+    ## 
+    ## 
+    ## 
+    ## Table: Observations not shared
+    ## 
+    ## version   SITE                              observation
+    ## --------  -------------------------------  ------------
+    ## x         Burbank                                     2
+    ## x         Lynwood                                     5
+    ## y         Compton                                     5
+    ## y         Glendora                                    2
+    ## y         Long Beach-Route 710 Near Road             10
+    ## y         Pico Rivera #2                              6
+    ## y         Santa Clarita                              11
+    ## 
+    ## 
+    ## 
+    ## Table: Differences detected by variable
+    ## 
+    ##                                      
+    ##  ------------------------------------
+    ##  No differences detected by variable 
+    ##  ------------------------------------
+    ## 
+    ## 
+    ## 
+    ## Table: Differences detected
+    ## 
+    ##                          
+    ##  ------------------------
+    ##  No differences detected 
+    ##  ------------------------
+    ## 
+    ## 
+    ## 
+    ## Table: Non-identical attributes
+    ## 
+    ##                              
+    ##  ----------------------------
+    ##  No non-identical attributes 
+    ##  ----------------------------
+
+For sites in LA, there were 108 empty names which were deleted. Then
+there were 8 sites in common, 2 sites in 2004 but not 2019( Burbank and
+Lynwood), 5 sites in 2019 but not 2004(Compton, Glendora, Long
+Beach-Route 710 Near Road, Pico Rivera \#2, Santa Clarita). So we can
+conclude that LA had more sites in 2019( 13) than in 2004( 10).
+
+Gather only those sites in common for later analysis:
+
+``` r
+all_si= all %>% filter(all$SITE %in% intersect(s04$SITE, s19$SITE))
+```
+
+## Step.5 Explore the main question of interest at three different spatial levels. Create exploratory plots (e.g. boxplots, histograms, line plots) and summary statistics that best suit each level of data. Be sure to write up explanations of what you observe in these data.
+
+### State
+
+``` r
+with(all, tapply(PM2.5, year, summary))
+```
+
+    ## $`2004`
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##    0.00    6.00   10.10   13.13   16.30  251.00 
+    ## 
+    ## $`2019`
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##   0.000   4.000   6.500   7.786  10.000 120.900
+
+``` r
+ggplot(all) +
+  geom_boxplot(mapping= aes(x= year, y= PM2.5, fill= year))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+``` r
+la = group_by(all, year, STATE) %>% summarize(PM2.5 = mean(PM2.5, na.rm = TRUE))
+```
+
+    ## `summarise()` has grouped output by 'year'. You can override using the
+    ## `.groups` argument.
+
+``` r
+la
+```
+
+    ## # A tibble: 2 × 3
+    ## # Groups:   year [2]
+    ##   year  STATE      PM2.5
+    ##   <chr> <chr>      <dbl>
+    ## 1 2004  California 13.1 
+    ## 2 2019  California  7.79
+
+``` r
+qplot(xyear, PM2.5, data = mutate(la, xyear = as.numeric(as.character(year))),
+      geom = c("point", "line"))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+At California State, there were more extremely large values of daily
+mean PM2.5 concentration in 2004 than in 2019. Also, both the mean and
+median of PM2.5 in 2019 were smaller than in 2014, indicating that the
+PM2.5 pollution condition might improve over the past 15 years.
+
+### County
+
+Calculate the mean of PM2.5 for each county in 2004 and 2019.
+
+``` r
+con = group_by(all_c, year, COUNTY) %>% summarize(PM2.5 = mean(PM2.5, na.rm = TRUE))
+```
+
+    ## `summarise()` has grouped output by 'year'. You can override using the
+    ## `.groups` argument.
+
+``` r
+head(con)
+```
+
+    ## # A tibble: 6 × 3
+    ## # Groups:   year [1]
+    ##   year  COUNTY       PM2.5
+    ##   <chr> <chr>        <dbl>
+    ## 1 2004  Alameda      11.1 
+    ## 2 2004  Butte        10.1 
+    ## 3 2004  Calaveras     7.61
+    ## 4 2004  Colusa       10.0 
+    ## 5 2004  Contra Costa 12.8 
+    ## 6 2004  Del Norte     3.41
+
+``` r
+qplot(xyear, PM2.5, data = mutate(con, xyear = as.numeric(as.character(year))), 
+       color = factor(COUNTY), 
+       geom = c("point", "line"))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+In the county level, most states’ mean PM2.5 decreased from 2004 to
+2019, but there were still some states having increased mean PM2.5 over
+years.
+
+### Sites in Los Angeles
+
+``` r
+si = group_by(all_si, year, SITE) %>% summarize(PM2.5 = mean(PM2.5, na.rm = TRUE))
+```
+
+    ## `summarise()` has grouped output by 'year'. You can override using the
+    ## `.groups` argument.
+
+``` r
+print(si)
+```
+
+    ## # A tibble: 16 × 3
+    ## # Groups:   year [2]
+    ##    year  SITE                          PM2.5
+    ##    <chr> <chr>                         <dbl>
+    ##  1 2004  Azusa                         18.4 
+    ##  2 2004  Lancaster-Division Street      8.50
+    ##  3 2004  Lebec                          4.14
+    ##  4 2004  Long Beach (North)            17.6 
+    ##  5 2004  Long Beach (South)            16.6 
+    ##  6 2004  Los Angeles-North Main Street 20.1 
+    ##  7 2004  Pasadena                      16.6 
+    ##  8 2004  Reseda                        15.6 
+    ##  9 2019  Azusa                          9.69
+    ## 10 2019  Lancaster-Division Street      6.19
+    ## 11 2019  Lebec                          4.67
+    ## 12 2019  Long Beach (North)             9.02
+    ## 13 2019  Long Beach (South)             9.94
+    ## 14 2019  Los Angeles-North Main Street 11.7 
+    ## 15 2019  Pasadena                       8.99
+    ## 16 2019  Reseda                        11.2
+
+``` r
+qplot(xyear, PM2.5, data = mutate(si, xyear = as.numeric(as.character(year))), 
+       color = factor(SITE), 
+       geom = c("point", "line"))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+
+Among the sites in LA, except Lebec, all other sites both included in
+2004 and 2019 had decreased PM2.5 levels, showing an improvement of
+pM2.5 pollution condition in LA over the past 15 years. The sites not in
+common were not presented in this graph.

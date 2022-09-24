@@ -114,82 +114,85 @@ all_2= all[order(PM2.5)]
 head(all_2)
 tail(all_2)
 ```
-* No missing values and no weird values which could be implausible.
+No missing values and no weird values which could be implausible.
 
 ### At county level
 ```{r}
-
+c04= all %>% filter(year==2004) %>% distinct(COUNTY) 
+c19= all %>% filter(year==2019) %>% distinct(COUNTY)
+library(arsenal)
+summary(comparedf(c04,c19, by="COUNTY"))
+```
+There were 47 counties observed in 2004, while 51 counties observed in 2019. The unmatched counties were: Glenn, Madera, Napa,Tehama( all from 2019). So we should keep only those counties in common for later analysis:
+```{r}
+all_c= all %>% filter(all$COUNTY %in% intersect(c04$COUNTY, c19$COUNTY))
 ```
 
 ### At site level
+* LA's county code is 37
 ```{r}
+all_la= subset(all, COUNTY_CODE==37)
+sum(all_la$SITE=="")
+all_la= subset(all_la, all_la$SITE != "")
+s04= all_la %>% filter(year==2004) %>% distinct(SITE) 
+s19= all_la %>% filter(year==2019) %>% distinct(SITE)
+library(arsenal)
+summary(comparedf(s04,s19, by="SITE"))
+```
+For sites in LA, there were 108 empty names which were deleted. Then there were 8 sites in common, 2 sites in 2004 but not 2019( Burbank and Lynwood), 5 sites in 2019 but not 2004(Compton, Glendora, Long Beach-Route 710 Near Road, Pico Rivera #2, Santa Clarita). So we can conclude that LA had more sites in 2019( 13) than in 2004( 10). 
 
+Gather only those sites in common for later analysis:
+```{r}
+all_si= all %>% filter(all$SITE %in% intersect(s04$SITE, s19$SITE))
 ```
 
+ 
+## Step.5 Explore the main question of interest at three different spatial levels. Create exploratory plots (e.g. boxplots, histograms, line plots) and summary statistics that best suit each level of data. Be sure to write up explanations of what you observe in these data.
 
-### Step.5 Explore the main question of interest at three different spatial levels. Create exploratory plots (e.g. boxplots, histograms, line plots) and summary statistics that best suit each level of data. Be sure to write up explanations of what you observe in these data.
-
-state
+### State
 ```{r}
-
+with(all, tapply(PM2.5, year, summary))
 ```
 
-county
 ```{r}
-
+ggplot(all) +
+  geom_boxplot(mapping= aes(x= year, y= PM2.5, fill= year))
 ```
 
-site in Los Angeles
 ```{r}
+la = group_by(all, year, STATE) %>% summarize(PM2.5 = mean(PM2.5, na.rm = TRUE))
 
+la
+
+qplot(xyear, PM2.5, data = mutate(la, xyear = as.numeric(as.character(year))),
+      geom = c("point", "line"))
 ```
 
+At California State, there were more extremely large values of daily mean PM2.5 concentration in 2004 than in 2019. Also, both the mean and median of PM2.5 in 2019 were smaller than in 2014, indicating that the PM2.5 pollution condition might improve over the past 15 years.
 
+### County
+Calculate the mean of PM2.5 for each county in 2004 and 2019.
+```{r}
+con = group_by(all_c, year, COUNTY) %>% summarize(PM2.5 = mean(PM2.5, na.rm = TRUE))
 
+head(con)
 
+qplot(xyear, PM2.5, data = mutate(con, xyear = as.numeric(as.character(year))), 
+       color = factor(COUNTY), 
+       geom = c("point", "line"))
+```
 
+In the county level, most states' mean PM2.5 decreased from 2004 to 2019, but there were still some states having increased mean PM2.5 over years.
 
+### Sites in Los Angeles
+```{r}
+si = group_by(all_si, year, SITE) %>% summarize(PM2.5 = mean(PM2.5, na.rm = TRUE))
 
+print(si)
 
+qplot(xyear, PM2.5, data = mutate(si, xyear = as.numeric(as.character(year))), 
+       color = factor(SITE), 
+       geom = c("point", "line"))
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Among the sites in LA, except Lebec, all other sites both included in 2004 and 2019 had decreased PM2.5 levels, showing an improvement of pM2.5 pollution condition in LA over the past 15 years. The sites not in common were not presented in this graph.
