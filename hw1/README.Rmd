@@ -123,7 +123,9 @@ c19= all %>% filter(year==2019) %>% distinct(COUNTY)
 library(arsenal)
 summary(comparedf(c04,c19, by="COUNTY"))
 ```
-There were 47 counties observed in 2004, while 51 counties observed in 2019. The unmatched counties were: Glenn, Madera, Napa,Tehama( all from 2019). So we should keep only those counties in common for later analysis:
+
+There were 47 counties observed in 2004, while 51 counties observed in 2019. The unmatched counties were: Glenn, Madera, Napa,Tehama( all from 2019). 
+So we should keep only those counties in common for later analysis:
 ```{r}
 all_c= all %>% filter(all$COUNTY %in% intersect(c04$COUNTY, c19$COUNTY))
 ```
