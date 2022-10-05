@@ -17,15 +17,15 @@ library(R.utils)
 library(lubridate)
 library(leaflet)
 library(webshot)
-webshot::install_phantomjs()
+#webshot::install_phantomjs()
 ```
 
 ## Step1. Conduct EDA Checklist items 2-4.
 
 Download then read in the data
 ```{r}
-d04 <- data.table::fread("/Users/gao/Desktop/566 hw1/data_2004.csv")
-d19 <- data.table::fread("/Users/gao/Desktop/566 hw1/data_2019.csv")
+d04 <- data.table::fread("../../2004.csv")
+d19 <- data.table::fread("../../2019.csv")
 ```
 
 For each of the two datasets, check the dimensions, headers, footers, variable names and variable types.
@@ -91,15 +91,24 @@ all= rename(all, "lat"= `SITE_LATITUDE`, "lon"= `SITE_LONGITUDE`)
 
 ## Step3. Create a basic map in leaflet() that shows the locations of the sites (make sure to use different colors for each year). Summarize the spatial distribution of the monitoring sites.
 
+```{r unique-stations}
+met_stations <- (unique(all[,c("lat","lon","year")]))  
+dim(met_stations)
+```
+
+By using opacity and fillOpacity < 1, we can see the overlapping points as purple, a combination of red and blue.
+
 ```{r}
 pal <- colorFactor(
   palette = c('red','blue'),
-  domain = all$year
+  domain = met_stations$year
 )
 
-leaflet(all) %>%
+leaflet(met_stations) %>%
   addProviderTiles('OpenStreetMap') %>% 
-  addCircles(lat=~lat,lng=~lon, opacity=1, fillOpacity=1, radius=100, color = ~pal(year))
+  addCircles(lat=~lat,lng=~lon, opacity=0.5, fillOpacity=0.25, radius=100, color = ~pal(year)) %>%
+addLegend('bottomleft', pal=pal, values=met_stations$year,
+          title='Measurement Year', opacity=1)
 ```
 
 > SUMMARY: Based on this map, there were much more sites in 2019 (marked as blue spots) than in 2004 (marked as red spots). In 2019 the sites spread the whole California State, comparing with only several separate spots in 2004.
