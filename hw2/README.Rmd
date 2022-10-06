@@ -13,56 +13,184 @@ library(tidyverse)
 library(data.table)
 library(R.utils)
 library(lubridate)
-library(leaflet)
-library(webshot)
-webshot::install_phantomjs()
 ```
-
 
 # Data Wrangling
 
-### Merge the individual and regional CHS datasets using the location variable.
+### Download and read in csv.
 ```{r}
+if (!file.exists("individual.csv")) {
+  download.file(
+    url = "https://raw.githubusercontent.com/USCbiostats/data-science-data/master/01_chs/chs_individual.csv", "individual.csv", method = "libcurl", timeout  = 60)
+}
+ind= data.table::fread("individual.csv")
 
+if (!file.exists("regional.csv")) {
+  download.file(
+    url = "https://raw.githubusercontent.com/USCbiostats/data-science-data/master/01_chs/chs_regional.csv", "regional.csv", method = "libcurl", timeout  = 60)
+}
+reg= data.table::fread("regional.csv")
 ```
 
+### Merge the individual and regional CHS datasets using the location variable.
+```{r}
+chs= merge(ind, reg, by= "townname", all=T)
+```
 
 ## 1.After merging the data, make sure you don’t have any duplicates by counting the number of rows. Make sure it matches.
 ```{r}
-
+str(chs)
+nrow(chs)
+nrow(ind)
+nrow(chs)== nrow(ind)
 ```
+Since the combined dataset and individual dataset had the same number of rows, there was no duplicate.
 
-In the case of missing values, impute data using the average within the variables “male” and “hispanic”.
+Check for weird or missing values of key variables. 
 ```{r}
-
+#numeric
+summary(chs$bmi)
+summary(chs$fev)
+summary(chs$pm25_mass)
+#categorical
+sum(is.na(chs$smoke))
+sum(is.na(chs$gasstove))
+sum(is.na(chs$asthma))
+sum(is.na(chs$townname))
+sum(is.na(chs$male))
 ```
+For numeric variables, there were no weird values. BMI(89) and FEV(95) had missing values.
+For categorical variables, smoke(40), gasstove(33), and asthma(31) had missing values, but as they were all binary, we cannot assign any "average" to them. 
 
-
-## 2.Create a new categorical variable named “obesity_level” using the BMI measurement (underweight BMI<14; normal BMI 14-22; overweight BMI 22-24; obese BMI>24). To make sure the variable is rightly coded, create a summary table that contains the minimum BMI, maximum BMI, and the total number of observations per category.
+Proportions of NA:
 ```{r}
-
+mean(is.na(chs$bmi))
+mean(is.na(chs$fev))
+mean(is.na(chs$smoke))
+mean(is.na(chs$gasstove))
+mean(is.na(chs$asthma))
 ```
+
+Since all the missing values of categorical variables took only about 3% of the whole, we can drop them for further analysis needs:
+```{r}
+chs= chs[!is.na(smoke) & !is.na(gasstove) & !is.na(asthma)]
+```
+Noted that there were 78 observations dropped from the dataset to eliminate missing values of categorical variables.
+
+### So for BMI and FEV's missing data, impute data using the average within the variables “male” and “hispanic”.
+```{r}
+sum(is.na(chs$bmi))
+sum(is.na(chs$fev))
+
+bmi_m= mean(chs[male=="1" & hispanic=="1", bmi], na.rm=T)
+fev_m= mean(chs[male=="1" & hispanic=="1", fev], na.rm=T)
+
+chs$bmi[is.na(chs$bmi)]= bmi_m
+chs$fev[is.na(chs$fev)]= fev_m
+```
+After data cleaning, 79 missing values of BMI and 85 of FEV were also replaced with the corresponding average values.
+
+
+## 2.Create a new categorical variable named “obesity_level” using the BMI measurement (underweight BMI<14; normal BMI 14-22; overweight BMI 22-24; obese BMI>24). 
+```{r}
+chs[, obesity_level := fifelse(
+  bmi < 14, "underweight", 
+  fifelse(bmi < 22, "normal", 
+  fifelse(bmi < 24, "overweight","obese")))
+  ]
+```
+
+### To make sure the variable is rightly coded, create a summary table that contains the minimum BMI, maximum BMI, and the total number of observations per category.
+```{r}
+summary(chs$bmi)
+table(chs$obesity_level)
+```
+
+Summary table:
+```{r}
+obe= chs[, .(
+  BMI_Min= min(bmi),
+  `# of Underweight(<14)`= 34,
+  `# of Normal(14-22)`= 912,
+  `# of Overweight(22-24)`= 82,
+  `# of Obese(>24)`= 94,
+  BMI_Max= max(bmi)
+  )]
+knitr::kable(obe)
+```
+From the table, we can find that most children in this study had normal BMI level, yet the number of overweight and obese is also alarming.
 
 
 ## 3.Create another categorical variable named “smoke_gas_exposure” that summarizes “Second Hand Smoke” and “Gas Stove.” The variable should have four categories in total.
 ```{r}
-
+chs[, smoke_gas_exposure := fifelse(smoke == 1 & gasstove==1, "both",
+                fifelse(smoke==1 & gasstove== 0, "smoke_only",
+                fifelse(smoke==0 & gasstove ==1, "gas_only","neither")))
+    ]
+table(chs$smoke_gas_exposure)
 ```
 
 
 ## 4.Create four summary tables showing the average (or proportion, if binary) and sd of “Forced expiratory volume in 1 second (ml)” and asthma indicator by town, sex, obesity level, and “smoke_gas_exposure.”
-```{r}
 
+### Townname table:
+```{r}
+to= chs[, .(
+  N= .N, 	
+`Average FEV1`=	mean(fev),	
+`SD FEV1`= sd(fev),		
+`%Asthma`= sum(asthma==1)/sum(asthma==1 | asthma==0)
+  ), by= townname]
+
+knitr::kable(to)
 ```
+
+
+### Sex(male) table:
+```{r}
+se= chs[, .(
+  N= .N, 	
+`Average FEV1`=	mean(fev),	
+`SD FEV1`= sd(fev),		
+`%Asthma`= sum(asthma==1)/sum(asthma==1 | asthma==0)
+  ), by= male]
+
+knitr::kable(se)
+```
+
+### Obesity_level table:
+```{r}
+ob= chs[, .(
+  N= .N, 	
+`Average FEV1`=	mean(fev),	
+`SD FEV1`= sd(fev),		
+`%Asthma`= sum(asthma==1)/sum(asthma==1 | asthma==0)
+  ), by= obesity_level]
+
+knitr::kable(ob)
+```
+
+### Smoke_gas_exposure table:
+```{r}
+sge= chs[, .(
+  N= .N, 	
+`Average FEV1`=	mean(fev),	
+`SD FEV1`= sd(fev),		
+`%Asthma`= sum(asthma==1)/sum(asthma==1 | asthma==0)
+  ), by= smoke_gas_exposure]
+
+knitr::kable(sge)
+```
+
 
 
 
 # Looking at the Data (EDA)
 
 > The primary questions of interest are: 
-> 1. What is the association between BMI and FEV (forced expiratory volume)? 
-> 2. What is the association between smoke and gas exposure and FEV? 
-> 3. What is the association between PM2.5 exposure and FEV?
+1. What is the association between BMI and FEV (forced expiratory volume)? 
+2. What is the association between smoke and gas exposure and FEV? 
+3. What is the association between PM2.5 exposure and FEV?
 
 ## 1.Facet plot showing scatterplots with regression lines of BMI vs FEV by “townname”.
 ```{r}
@@ -99,8 +227,7 @@ In the case of missing values, impute data using the average within the variable
 
 ```
 
-
-
+> SUMMARY: 
 
 
 
