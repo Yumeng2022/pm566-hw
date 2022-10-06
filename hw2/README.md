@@ -505,5 +505,3 @@ knitr::kable(sge)
 ## 5.A leaflet map showing the concentrations of PM2.5 mass in each of the CHS communities.
 
 ## 6.Choose a visualization to examine whether PM2.5 mass is associated with FEV.
-
-> SUMMARY:
