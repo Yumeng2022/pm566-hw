@@ -198,10 +198,12 @@ knitr::kable(sge)
 ```
 
 
+
 ## 2.Stacked histograms of FEV by BMI category and FEV by smoke/gas exposure. Use different color schemes than the ggplot default.
 ```{r}
 
 ```
+
 
 
 ## 3.Barchart of BMI by smoke/gas exposure.
@@ -210,16 +212,19 @@ knitr::kable(sge)
 ```
 
 
+
 ## 4.Statistical summary graphs of FEV by BMI and FEV by smoke/gas exposure category.
 ```{r}
 
 ```
 
 
+
 ## 5.A leaflet map showing the concentrations of PM2.5 mass in each of the CHS communities.
 ```{r}
 
 ```
+
 
 
 ## 6.Choose a visualization to examine whether PM2.5 mass is associated with FEV.
