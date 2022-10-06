@@ -184,7 +184,6 @@ knitr::kable(sge)
 
 
 
-
 # Looking at the Data (EDA)
 
 > The primary questions of interest are: 
