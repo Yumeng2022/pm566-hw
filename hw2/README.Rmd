@@ -1,0 +1,109 @@
+---
+title: "566-hw2"
+author: "Yumeng Gao"
+date: "`r Sys.Date()`"
+output: github_document
+always_allow_html: true
+---
+
+### Prepare the library
+```{r}
+library(dplyr)
+library(tidyverse)
+library(data.table)
+library(R.utils)
+library(lubridate)
+library(leaflet)
+library(webshot)
+webshot::install_phantomjs()
+```
+
+
+# Data Wrangling
+
+### Merge the individual and regional CHS datasets using the location variable.
+```{r}
+
+```
+
+
+## 1.After merging the data, make sure you don’t have any duplicates by counting the number of rows. Make sure it matches.
+```{r}
+
+```
+
+In the case of missing values, impute data using the average within the variables “male” and “hispanic”.
+```{r}
+
+```
+
+
+## 2.Create a new categorical variable named “obesity_level” using the BMI measurement (underweight BMI<14; normal BMI 14-22; overweight BMI 22-24; obese BMI>24). To make sure the variable is rightly coded, create a summary table that contains the minimum BMI, maximum BMI, and the total number of observations per category.
+```{r}
+
+```
+
+
+## 3.Create another categorical variable named “smoke_gas_exposure” that summarizes “Second Hand Smoke” and “Gas Stove.” The variable should have four categories in total.
+```{r}
+
+```
+
+
+## 4.Create four summary tables showing the average (or proportion, if binary) and sd of “Forced expiratory volume in 1 second (ml)” and asthma indicator by town, sex, obesity level, and “smoke_gas_exposure.”
+```{r}
+
+```
+
+
+
+# Looking at the Data (EDA)
+
+> The primary questions of interest are: 
+> 1. What is the association between BMI and FEV (forced expiratory volume)? 
+> 2. What is the association between smoke and gas exposure and FEV? 
+> 3. What is the association between PM2.5 exposure and FEV?
+
+## 1.Facet plot showing scatterplots with regression lines of BMI vs FEV by “townname”.
+```{r}
+
+```
+
+
+## 2.Stacked histograms of FEV by BMI category and FEV by smoke/gas exposure. Use different color schemes than the ggplot default.
+```{r}
+
+```
+
+
+## 3.Barchart of BMI by smoke/gas exposure.
+```{r}
+
+```
+
+
+## 4.Statistical summary graphs of FEV by BMI and FEV by smoke/gas exposure category.
+```{r}
+
+```
+
+
+## 5.A leaflet map showing the concentrations of PM2.5 mass in each of the CHS communities.
+```{r}
+
+```
+
+
+## 6.Choose a visualization to examine whether PM2.5 mass is associated with FEV.
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
