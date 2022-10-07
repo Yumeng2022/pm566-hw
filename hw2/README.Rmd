@@ -50,7 +50,7 @@ nrow(chs)== nrow(ind)
 ```
 Since the combined dataset and individual dataset had the same number of rows, there was no duplicate.
 
-Check for weird or missing values of key variables. 
+### Check for weird or missing values of key variables. 
 ```{r}
 #numeric
 summary(chs$bmi)
@@ -101,7 +101,7 @@ After data cleaning, 79 missing values of BMI and 85 missing values of FEV were 
 chs[, obesity_level := fifelse(
   bmi < 14, "underweight", 
   fifelse(bmi < 22, "normal", 
-  fifelse(bmi < 24, "overweight","obese")))
+  fifelse(bmi < 24, "overweight", "obese")))
   ]
 ```
 
@@ -131,7 +131,7 @@ From the table, we can find that most children in this study had normal BMI leve
 ```{r}
 chs[, smoke_gas_exposure := fifelse(smoke == 1 & gasstove==1, "both",
                 fifelse(smoke==1 & gasstove== 0, "smoke_only",
-                fifelse(smoke==0 & gasstove ==1, "gas_only","neither")))
+                fifelse(smoke==0 & gasstove ==1, "gas_only", "neither")))
     ]
 table(chs$smoke_gas_exposure)
 ```
@@ -146,11 +146,13 @@ to= chs[, .(
   N= .N, 	
 `Average FEV1`=	mean(fev),	
 `SD FEV1`= sd(fev),		
-`%Asthma`= sum(asthma==1)/sum(asthma==1 | asthma==0)
+`%Asthma`= 100* sum(asthma==1)/sum(asthma==1 | asthma==0)
   ), by= townname]
 
 knitr::kable(to)
 ```
+
+Among different towns, there was little difference of sample size, average FEV1 status. For proportion of asthma (%), Atascadero had the highest %asthma (25.53%) and Riverside had the lowest %asthma (10.64%), requiring further analysis.
 
 
 ### Sex(male) table:
@@ -159,11 +161,13 @@ se= chs[, .(
   N= .N, 	
 `Average FEV1`=	mean(fev),	
 `SD FEV1`= sd(fev),		
-`%Asthma`= sum(asthma==1)/sum(asthma==1 | asthma==0)
+`%Asthma`= 100* sum(asthma==1)/sum(asthma==1 | asthma==0)
   ), by= male]
 
 knitr::kable(se)
 ```
+
+This table showed that female kids had lower average FEV1 than male kids(1792.40 ml vs. 2109.82 ml), and also lower asthma proportion (11.89% vs. 17.45%).
 
 ### Obesity_level table:
 ```{r}
@@ -171,11 +175,13 @@ ob= chs[, .(
   N= .N, 	
 `Average FEV1`=	mean(fev),	
 `SD FEV1`= sd(fev),		
-`%Asthma`= sum(asthma==1)/sum(asthma==1 | asthma==0)
+`%Asthma`= 100* sum(asthma==1)/sum(asthma==1 | asthma==0)
   ), by= obesity_level]
 
 knitr::kable(ob)
 ```
+
+For obesity level, the average FEV1 and %asthma both had a increasing trend as the obesity level increases, underweight children had the lowest average FEV1 (1720.03 ml) and %asthma (8.82%), while obese children had the highest average FEV1 (2271.60 ml) and %asthma (22.34%).
 
 ### Smoke_gas_exposure table:
 ```{r}
@@ -183,13 +189,13 @@ sge= chs[, .(
   N= .N, 	
 `Average FEV1`=	mean(fev),	
 `SD FEV1`= sd(fev),		
-`%Asthma`= sum(asthma==1)/sum(asthma==1 | asthma==0)
+`%Asthma`= 100* sum(asthma==1)/sum(asthma==1 | asthma==0)
   ), by= smoke_gas_exposure]
 
 knitr::kable(sge)
 ```
 
-
+Considering the smoke_gas_exposure level, there was no obvious difference of the average FEV1, yet the smoke_only group had the highest %asthma (17.14%) and the both group had the lowest (13.01%). Gas_only group and neither group had similar asthma proportion (14.77% vs. 14.76%), indicating that maybe gas stove had little influence on FEV1 and asthma. However, the limited sample size would also affect the accuracy of the results.
 
 
 # Looking at the Data (EDA)
@@ -223,46 +229,65 @@ chs %>%
   ggplot(mapping = aes(x = bmi, y = fev)) + 
   geom_point(mapping = aes(color = townname)) + 
   geom_smooth(method = lm, mapping = aes(linetype = townname)) +
+  ggtitle("BMI vs FEV by Townname") +
   facet_wrap(~ townname, nrow = 3)
 ```
 
-Based on these 12 scatterplots of different town, we can find that among all the 12 towns, as children's BMI increases, their FEV increases, indicating that overweight and obesity may associated with higher amount of air exhaled during the first second of the FVC maneuver.
+Based on these 12 scatterplots of different towns, we can find that among all the 12 towns, as children's BMI increases, their FEV increases, indicating that overweight and obesity may associated with higher amount of air exhaled during the first second of the FVC maneuver.
 
 
 
 ## 2.Stacked histograms of FEV by BMI category and FEV by smoke/gas exposure. Use different color schemes than the ggplot default.
 ```{r}
 ggplot(chs) +
-   geom_histogram(mapping = aes(x = fev, fill= obesity_level)) +
+   geom_histogram(mapping = aes(x = fev, fill= obesity_level), binwidth = 50) +
    ggtitle("FEV by BMI category") +
    scale_fill_viridis_d()
 ```
 
+From this histogram we can also observe that as the obesity level goes up, the frequency of higher FEV level will increase. The normal level children had the largest peak and widest spread among 4 groups, but this might be explained by the largest sample size of normal group.
 
 ```{r}
 ggplot(chs) +
-   geom_histogram(mapping = aes(x = fev, fill= smoke_gas_exposure))+
+   geom_histogram(mapping = aes(x = fev, fill= smoke_gas_exposure), binwidth = 50) +
    ggtitle("FEV by Smoke_gas_exposure") +
    scale_fill_brewer(palette="Spectral")
 ```
 
+The spread of 4 groups were similar and the frequency of higher FEV level didn't show obvious dfiierence, too. The both group had the largest peak of FEV, which is more visible than the table. While smoke_only group had the lowest peak, which could be explained by the smallest sample size, so we cannot conclude that 2nd hand smoking had less effect on FEV1.
+
+
 ## 3.Barchart of BMI by smoke/gas exposure.
+
+### BMI
 ```{r}
-bar= chs %>%
-   ggplot() +
+ggplot(chs) +
    geom_bar(mapping = aes(x = bmi, colour = smoke_gas_exposure, fill=smoke_gas_exposure), width= 2)+
-   ggtitle("Barchart of FEV by Smoke_gas_exposure")
-bar + coord_flip()
+   ggtitle("Barchart of BMI by Smoke_gas_exposure")
 
 #better dodge?
-bar= chs %>%
-   ggplot() +
+ggplot(chs) +
    geom_bar(mapping = aes(x = bmi, colour = smoke_gas_exposure, fill=smoke_gas_exposure), position = "dodge", width= 2)+
-   ggtitle("Barchart of FEV by Smoke_gas_exposure")
-bar + coord_flip()
+   ggtitle("Barchart of BMI by Smoke_gas_exposure")
 ```
 
+All the highest bars among the four smoke_gas_exposure groups lied on the 18-20 BMI range. 
 
+### Obesity level
+```{r}
+chs$obesity_level= factor(chs$obesity_level, levels = c("underweight", "normal", "overweight", "obese"))
+
+ggplot(chs) +
+   geom_bar(mapping = aes(x = obesity_level, colour = smoke_gas_exposure, fill=smoke_gas_exposure), width= 2)+
+   ggtitle("Barchart of Obesity_level by Smoke_gas_exposure")
+
+#better dodge?
+ggplot(chs) +
+   geom_bar(mapping = aes(x = obesity_level, colour = smoke_gas_exposure, fill=smoke_gas_exposure), position = "dodge", width= 2)+
+   ggtitle("Barchart of Obesity_level by Smoke_gas_exposure")
+```
+
+Most underweight children (BMI<14) had both smoke_gas_exposure; most normal weight (BMI: 14-22) children had gas_only exposure; most overweight (BMI: 22-24) children had gas_only exposure; most obese (BMI>24) children had gas_only exposure, too. 
 
 ## 4.Statistical summary graphs of FEV by BMI and FEV by smoke/gas exposure category.
 ```{r}
@@ -270,7 +295,7 @@ chs %>%
   ggplot(mapping = aes(x = obesity_level, y = fev)) + 
     stat_summary(fun.data = mean_sdl, geom = "pointrange") +
     stat_summary(fun.data = mean_sdl, geom = "errorbar") +
-    ggtitle("FEV by besity_level")
+    ggtitle("FEV by obesity_level")
 
 chs %>%
   ggplot(mapping = aes(x = smoke_gas_exposure, y = fev)) + 
@@ -287,7 +312,6 @@ pal <- colorFactor(
   palette = c('red','blue'),  
   domain = chs$pm25_mass)
 
-
 leaflet(chs) %>%
   addProviderTiles('OpenStreetMap') %>% 
   addCircles(lat=~lat,lng=~lon, opacity=0.5, fillOpacity=0.25, radius=100, color = ~pal(pm25_mass)) %>%
@@ -299,9 +323,9 @@ addLegend('bottomleft', pal=pal, values=chs$pm25_mass,
 
 ## 6.Choose a visualization to examine whether PM2.5 mass is associated with FEV.
 ```{r}
-scatterplot <- ggplot(data = chs) + geom_point(mapping = aes(x = pm25_mass, y = fev))
-lineplot    <- ggplot(data = chs) + geom_smooth(mapping = aes(x = pm25_mass, y = fev))
-plot_grid(scatterplot, lineplot, labels = "AUTO")
+scatterplot= ggplot(data = chs) + geom_point(mapping = aes(x = pm25_mass, y = fev))
+lineplot= ggplot(data = chs) + geom_smooth(mapping = aes(x = pm25_mass, y = fev))
+plot_grid (scatterplot, lineplot, labels = "AUTO")
 ```
 
 
