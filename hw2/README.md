@@ -382,18 +382,18 @@ Summary table:
 ``` r
 obe= chs[, .(
   BMI_Min= min(bmi),
-  `# of Underweight(<14)`= 34,
-  `# of Normal(14-22)`= 912,
-  `# of Overweight(22-24)`= 82,
-  `# of Obese(>24)`= 94,
+  `# of Underweight (<14)`= 34,
+  `# of Normal (14-22)`= 912,
+  `# of Overweight (22-24)`= 82,
+  `# of Obese (>24)`= 94,
   BMI_Max= max(bmi)
   )]
 knitr::kable(obe)
 ```
 
-| BMI_Min | \# of Underweight(\<14) | \# of Normal(14-22) | \# of Overweight(22-24) | \# of Obese(\>24) |  BMI_Max |
-|--------:|------------------------:|--------------------:|------------------------:|------------------:|---------:|
-| 11.2964 |                      34 |                 912 |                      82 |                94 | 41.26613 |
+| BMI_Min | \# of Underweight (\<14) | \# of Normal (14-22) | \# of Overweight (22-24) | \# of Obese (\>24) |  BMI_Max |
+|--------:|-------------------------:|---------------------:|-------------------------:|-------------------:|---------:|
+| 11.2964 |                       34 |                  912 |                       82 |                 94 | 41.26613 |
 
 From the table, we can find that most children in this study had normal
 BMI level, yet the number of overweight and obese is also alarming.
@@ -443,7 +443,7 @@ knitr::kable(to)
 | Upland        |  98 |     2034.059 | 343.5017 | 12.24490 |
 
 Among different towns, there was little difference of sample size,
-average FEV1 status. For proportion of asthma (%), Atascadero had the
+average FEV1 status. For proportion of asthma, Atascadero had the
 highest %asthma (25.53%) and Riverside had the lowest %asthma (10.64%),
 requiring further analysis.
 
@@ -689,69 +689,46 @@ ggplot(chs) +
 ![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 The spread of 4 groups were similar and the frequency of higher FEV
-level didn’t show obvious dfiierence, too. The both group had the
-largest peak of FEV, which is more visible than the table. While
-smoke_only group had the lowest peak, which could be explained by the
-smallest sample size, so we cannot conclude that 2nd hand smoking had
-less effect on FEV1.
+level didn’t show obvious difference, too. The both group had the
+largest peak of FEV (which is more visible than the table before),
+suggesting that maybe children exposed to both second hand smoking and
+gas stove would have higher FEV1. Smoke_only group had the lowest peak,
+which could be explained by the smallest sample size, so we cannot
+conclude that 2nd hand smoking had less effect on FEV1.
 
 ## 3.Barchart of BMI by smoke/gas exposure.
 
-### BMI
-
-``` r
-ggplot(chs) +
-   geom_bar(mapping = aes(x = bmi, colour = smoke_gas_exposure, fill=smoke_gas_exposure), width= 2)+
-   ggtitle("Barchart of BMI by Smoke_gas_exposure")
-```
-
-    ## Warning: position_stack requires non-overlapping x intervals
-
-![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
-
-``` r
-#better dodge?
-ggplot(chs) +
-   geom_bar(mapping = aes(x = bmi, colour = smoke_gas_exposure, fill=smoke_gas_exposure), position = "dodge", width= 2)+
-   ggtitle("Barchart of BMI by Smoke_gas_exposure")
-```
-
-    ## Warning: position_dodge requires non-overlapping x intervals
-
-![](README_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
-
-All the highest bars among the four smoke_gas_exposure groups lied on
-the 18-20 BMI range.
-
-### Obesity level
+Using BMI(continuous) as x made the barchart hard to interpret, so it’s
+better to use obesity_level(categorical) instead:
 
 ``` r
 chs$obesity_level= factor(chs$obesity_level, levels = c("underweight", "normal", "overweight", "obese"))
 
 ggplot(chs) +
-   geom_bar(mapping = aes(x = obesity_level, colour = smoke_gas_exposure, fill=smoke_gas_exposure), width= 2)+
+   geom_bar(mapping = aes(x = obesity_level, colour = smoke_gas_exposure, fill=smoke_gas_exposure), width= 0.5)+
    ggtitle("Barchart of Obesity_level by Smoke_gas_exposure")
 ```
 
-    ## Warning: position_stack requires non-overlapping x intervals
-
-![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 ``` r
-#better dodge?
+#dodge version
 ggplot(chs) +
-   geom_bar(mapping = aes(x = obesity_level, colour = smoke_gas_exposure, fill=smoke_gas_exposure), position = "dodge", width= 2)+
+   geom_bar(mapping = aes(x = obesity_level, colour = smoke_gas_exposure, fill=smoke_gas_exposure), position = "dodge", width= 0.5)+
    ggtitle("Barchart of Obesity_level by Smoke_gas_exposure")
 ```
 
-    ## Warning: position_dodge requires non-overlapping x intervals
+![](README_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
 
-![](README_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
+Among obesity level, all 4 groups’ children had gas_only exposure the
+most. Underweight (BMI\<14) children didn’t have smoke_only exposure.
+Neither group appeared most frequently in normal weight (BMI: 14-22)
+children, indicating that eliminating those two exposures could improve
+children’s BMI status.
 
-Most underweight children (BMI\<14) had both smoke_gas_exposure; most
-normal weight (BMI: 14-22) children had gas_only exposure; most
-overweight (BMI: 22-24) children had gas_only exposure; most obese
-(BMI\>24) children had gas_only exposure, too.
+However, because of the huge difference in sample sizes among exposure
+groups, we may need larger study population to make inference about the
+relationship between BMI level and Smoke_gas_exposure.
 
 ## 4.Statistical summary graphs of FEV by BMI and FEV by smoke/gas exposure category.
 
@@ -763,7 +740,7 @@ chs %>%
     ggtitle("FEV by obesity_level")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 ``` r
 chs %>%
@@ -773,7 +750,15 @@ chs %>%
     ggtitle("FEV by smoke_gas_exposure")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
+
+From the 1st graph, we could conclude that as the obesity level goes up,
+children in this study tended to have higher average FEV.
+
+In the 2nd graph, we could hardly find obvious difference among the four
+smoke_gas_exposure groups. The order of smoke_gas_exposure from smallest
+average FEV to largest is: both, gas_only, neither, smoke_only. No clear
+conclusion can be made based on current results.
 
 ## 5.A leaflet map showing the concentrations of PM2.5 mass in each of the CHS communities.
 
@@ -789,9 +774,29 @@ addLegend('bottomleft', pal=pal, values=chs$pm25_mass,
           title='Concentrations of PM2.5 mass among CHS communities', opacity=1)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+
+In the map, we could find those CHS communities located in the city
+(more transportation trails) had higher concentrations of PM2.5 mass,
+while those communities near the sea and far from the downtown area
+(less transportation trails) had lower concentrations of PM2.5 mass.
+Thus, the transportation pollution might somehow account for the
+increase of PM2.5 mass.
 
 ## 6.Choose a visualization to examine whether PM2.5 mass is associated with FEV.
+
+Scatter plot and the regression line:
+
+``` r
+ chs %>%
+   ggplot(mapping = aes(x = pm25_mass, y = fev)) +
+   geom_point() +
+   geom_smooth(method = lm, se = FALSE, col = "blue")
+```
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](README_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 ``` r
 scatterplot= ggplot(data = chs) + geom_point(mapping = aes(x = pm25_mass, y = fev))
@@ -802,3 +807,6 @@ plot_grid (scatterplot, lineplot, labels = "AUTO")
     ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 
 ![](README_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+
+We can conclude that, PM2.5 mass is propably associated with FEV. As
+PM2.5 mass concentration increases, children’s FEV will decrease.
