@@ -540,9 +540,9 @@ knitr::kable()
 
 5)  prostate cancer: cancer，prostate, treatment, disease, patients
 
-The order of top 5 common tokens were changed for each term. TF-IDF not
-only focuses on the frequency of words but also provides the importance
-of the words. For example, although “patients” were appearing very
-frequently but its ranking here was lower than before for each term.
-Thus, the important tokens were ranked higher and the key information
-could be better presented by this method.
+The order of top 5 common tokens were changed for each term. TF-IDF
+value not only focuses on the frequency of words but also provides the
+importance of the words. For example, although “patients” were appearing
+very frequently but its ranking here was lower than before for each
+term. Thus, the important tokens were ranked higher and the key
+information could be better presented by this method.
