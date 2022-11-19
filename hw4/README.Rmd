@@ -6,15 +6,10 @@ output: github_document
 always_allow_html: true
 ---
 
-#HPC
+# HPC
+
 ## Problem 1: Make sure your code is nice
 Rewrite the following R functions to make them faster. It is OK (and recommended) to take a look at Stackoverflow and Google
-
-```{r}
-m= matrix(1:16, ncol=4)
-m
-```
-
 
 ```{r}
 # Total row sums
@@ -27,13 +22,11 @@ fun1 <- function(mat) {
   ans
 }
 
-fun1(m)
 
 fun1alt <- function(mat) {
   rowSums(mat)
 }
 
-fun1alt(m)
 
 # Cumulative sum by row
 fun2 <- function(mat) {
@@ -48,19 +41,11 @@ fun2 <- function(mat) {
   ans
 }
 
-fun2(m)
 
 fun2alt <- function(mat) {
   t(apply(mat,1,cumsum))
-  #ans= data.frame(mat)
-  #cumsum(ans)
-  #dt= as.data.table(mat)
-  #x=cumsum(dt)
-  #x
-  #dt[, acc_sum := cumsum(count)]
 }
 
-fun2alt(m)
 
 # Use the data with this code
 set.seed(2315)
@@ -103,16 +88,25 @@ system.time({
 
 Rewrite the previous code using parLapply() to make it run faster. Make sure you set the seed using clusterSetRNGStream():
 ```{r}
-# YOUR CODE HERE
+library(parallel)
+cl <- makePSOCKcluster(4L) 
+clusterSetRNGStream(cl, 1234)
+n=10000
+clusterExport(cl, c("n", "sim_pi"))
 system.time({
-  # YOUR CODE HERE
-  ans <- # YOUR CODE HERE
+  ans <- unlist(parLapply(cl, 1:4000, sim_pi, n))
   print(mean(ans))
-  # YOUR CODE HERE
 })
 ```
 
-#SQL
+```{r}
+stopCluster(cl)
+```
+
+
+
+# SQL
+
 Setup a temporary database by running the following chunk
 ```{r}
 # install.packages(c("RSQLite", "DBI"))
@@ -134,76 +128,56 @@ dbWriteTable(con, "film_category", film_category)
 dbWriteTable(con, "category", category)
 ```
 
-When you write a new chunk, remember to replace the r with sql, connection=con. Some of these questions will reqruire you to use an inner join. Read more about them here https://www.w3schools.com/sql/sql_join_inner.asp
+When you write a new chunk, remember to replace the r with sql, connection=con.
 
 ## Question 1
 How many many movies is there avaliable in each rating catagory.
+```{sql, connection=con}
+SELECT rating,
+  COUNT(*) AS "Count"
+FROM film
+GROUP BY rating
+```
 
 ## Question 2
 What is the average replacement cost and rental rate for each rating category.
+```{sql, connection=con}
+SELECT rating, 
+  AVG(replacement_cost) AS "Average Replacement Cost",
+  AVG(rental_rate) AS "Average Rental Rate"
+FROM film
+GROUP BY rating
+```
 
 ## Question 3
-Use table film_category together with film to find the how many films there are witth each category ID
+Use table film_category together with film to find the how many films there are with each category ID
+```{sql, connection=con}
+SELECT category_id,
+  COUNT(*) as "Count"
+FROM film AS a INNER JOIN film_category AS b
+on a.film_id = b.film_id
+GROUP BY category_id 
+```
 
 ## Question 4
 Incorporate table category into the answer to the previous question to find the name of the most popular category.
+```{sql, connection=con}
+SELECT c.name, b.category_id,
+  COUNT(*) AS "Count"
+FROM ((film_category AS b
+INNER JOIN film AS a ON a.film_id = b.film_id)
+INNER JOIN category AS c ON b.category_id = c.category_id)
+GROUP BY c.name
+ORDER BY "Count" DESC
+```
+
+From this table, we can find that Sports is the most famous category.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+### Clean up
+```{r}
+dbDisconnect(con)
+```
 
 
 
