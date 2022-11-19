@@ -1,0 +1,214 @@
+566-hw4
+================
+Yumeng Gao
+2022-11-18
+
+\#HPC \## Problem 1: Make sure your code is nice Rewrite the following R
+functions to make them faster. It is OK (and recommended) to take a look
+at Stackoverflow and Google
+
+``` r
+m= matrix(1:16, ncol=4)
+m
+```
+
+    ##      [,1] [,2] [,3] [,4]
+    ## [1,]    1    5    9   13
+    ## [2,]    2    6   10   14
+    ## [3,]    3    7   11   15
+    ## [4,]    4    8   12   16
+
+``` r
+# Total row sums
+fun1 <- function(mat) {
+  n <- nrow(mat)
+  ans <- double(n) 
+  for (i in 1:n) {
+    ans[i] <- sum(mat[i, ])
+  }
+  ans
+}
+
+fun1(m)
+```
+
+    ## [1] 28 32 36 40
+
+``` r
+fun1alt <- function(mat) {
+  rowSums(mat)
+}
+
+fun1alt(m)
+```
+
+    ## [1] 28 32 36 40
+
+``` r
+# Cumulative sum by row
+fun2 <- function(mat) {
+  n <- nrow(mat)
+  k <- ncol(mat)
+  ans <- mat
+  for (i in 1:n) {
+    for (j in 2:k) {
+      ans[i,j] <- mat[i, j] + ans[i, j - 1]
+    }
+  }
+  ans
+}
+
+fun2(m)
+```
+
+    ##      [,1] [,2] [,3] [,4]
+    ## [1,]    1    6   15   28
+    ## [2,]    2    8   18   32
+    ## [3,]    3   10   21   36
+    ## [4,]    4   12   24   40
+
+``` r
+fun2alt <- function(mat) {
+  t(apply(mat,1,cumsum))
+  #ans= data.frame(mat)
+  #cumsum(ans)
+  #dt= as.data.table(mat)
+  #x=cumsum(dt)
+  #x
+  #dt[, acc_sum := cumsum(count)]
+}
+
+fun2alt(m)
+```
+
+    ##      [,1] [,2] [,3] [,4]
+    ## [1,]    1    6   15   28
+    ## [2,]    2    8   18   32
+    ## [3,]    3   10   21   36
+    ## [4,]    4   12   24   40
+
+``` r
+# Use the data with this code
+set.seed(2315)
+dat <- matrix(rnorm(200 * 100), nrow = 200)
+
+# Test for the first
+t1= microbenchmark::microbenchmark(fun1(dat), fun1alt(dat))
+print(t1, unit = "relative", check = "equivalent")
+```
+
+    ## Unit: relative
+    ##          expr      min       lq     mean   median       uq      max neval
+    ##     fun1(dat) 11.63823 11.71293 8.763474 11.46086 10.28159 1.014368   100
+    ##  fun1alt(dat)  1.00000  1.00000 1.000000  1.00000  1.00000 1.000000   100
+
+``` r
+# Test for the second
+t2= microbenchmark::microbenchmark(fun2(dat), fun2alt(dat))
+print(t2, unit = "relative", check = "equivalent")
+```
+
+    ## Unit: relative
+    ##          expr      min       lq    mean  median       uq      max neval
+    ##     fun2(dat) 3.905748 2.372881 1.96288 2.51316 1.943557 1.132194   100
+    ##  fun2alt(dat) 1.000000 1.000000 1.00000 1.00000 1.000000 1.000000   100
+
+The last argument, check = “equivalent”, is included to make sure that
+the functions return the same result.
+
+## Problem 2: Make things run faster with parallel computing
+
+The following function allows simulating PI
+
+``` r
+sim_pi <- function(n = 1000, i = NULL) {
+  p <- matrix(runif(n*2), ncol = 2)
+  mean(rowSums(p^2) < 1) * 4
+}
+
+# Here is an example of the run
+set.seed(156)
+sim_pi(1000) # 3.132
+```
+
+    ## [1] 3.132
+
+In order to get accurate estimates, we can run this function multiple
+times, with the following code:
+
+``` r
+set.seed(1231)
+system.time({
+  ans <- unlist(lapply(1:4000, sim_pi, n = 10000))
+  print(mean(ans))
+})
+```
+
+    ## [1] 3.14124
+
+    ##    user  system elapsed 
+    ##   3.380   1.081   4.566
+
+Rewrite the previous code using parLapply() to make it run faster. Make
+sure you set the seed using clusterSetRNGStream():
+
+``` r
+# YOUR CODE HERE
+system.time({
+  # YOUR CODE HERE
+  ans <- # YOUR CODE HERE
+  print(mean(ans))
+  # YOUR CODE HERE
+})
+```
+
+    ## [1] 3.14124
+
+    ##    user  system elapsed 
+    ##       0       0       0
+
+\#SQL Setup a temporary database by running the following chunk
+
+``` r
+# install.packages(c("RSQLite", "DBI"))
+
+library(RSQLite)
+library(DBI)
+
+# Initialize a temporary in memory database
+con <- dbConnect(SQLite(), ":memory:")
+
+# Download tables
+film <- read.csv("https://raw.githubusercontent.com/ivanceras/sakila/master/csv-sakila-db/film.csv")
+film_category <- read.csv("https://raw.githubusercontent.com/ivanceras/sakila/master/csv-sakila-db/film_category.csv")
+category <- read.csv("https://raw.githubusercontent.com/ivanceras/sakila/master/csv-sakila-db/category.csv")
+
+# Copy data.frames to database
+dbWriteTable(con, "film", film)
+dbWriteTable(con, "film_category", film_category)
+dbWriteTable(con, "category", category)
+```
+
+When you write a new chunk, remember to replace the r with sql,
+connection=con. Some of these questions will reqruire you to use an
+inner join. Read more about them here
+<https://www.w3schools.com/sql/sql_join_inner.asp>
+
+## Question 1
+
+How many many movies is there avaliable in each rating catagory.
+
+## Question 2
+
+What is the average replacement cost and rental rate for each rating
+category.
+
+## Question 3
+
+Use table film_category together with film to find the how many films
+there are witth each category ID
+
+## Question 4
+
+Incorporate table category into the answer to the previous question to
+find the name of the most popular category.
